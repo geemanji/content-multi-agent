@@ -1,0 +1,79 @@
+steps:
+  # 1. Build all images
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/researcher', 'agents/researcher']
+    waitFor: ['-']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/content-builder', 'agents/content_builder']
+    waitFor: ['-']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/judge', 'agents/judge']
+    waitFor: ['-']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/orchestrator', 'agents/orchestrator']
+    waitFor: ['-']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/course-creator', 'app']
+    waitFor: ['-']
+
+  # 2. Push all images
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/researcher']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/content-builder']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/judge']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/orchestrator']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/course-creator']
+
+  # 3. Deploy independent agents
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud run deploy researcher --image gcr.io/$PROJECT_ID/researcher --region ${_REGION} --project $PROJECT_ID --no-allow-unauthenticated --set-env-vars GOOGLE_CLOUD_PROJECT=$PROJECT_ID,GOOGLE_GENAI_USE_VERTEXAI=true
+        gcloud run deploy content-builder --image gcr.io/$PROJECT_ID/content-builder --region ${_REGION} --project $PROJECT_ID --no-allow-unauthenticated --set-env-vars GOOGLE_CLOUD_PROJECT=$PROJECT_ID,GOOGLE_GENAI_USE_VERTEXAI=true
+        gcloud run deploy judge --image gcr.io/$PROJECT_ID/judge --region ${_REGION} --project $PROJECT_ID --no-allow-unauthenticated --set-env-vars GOOGLE_CLOUD_PROJECT=$PROJECT_ID,GOOGLE_GENAI_USE_VERTEXAI=true
+
+  # 4. Deploy Orchestrator (needs URLs)
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        RESEARCHER_URL=$(gcloud run services describe researcher --region ${_REGION} --project $PROJECT_ID --format='value(status.url)')
+        CONTENT_BUILDER_URL=$(gcloud run services describe content-builder --region ${_REGION} --project $PROJECT_ID --format='value(status.url)')
+        JUDGE_URL=$(gcloud run services describe judge --region ${_REGION} --project $PROJECT_ID --format='value(status.url)')
+        
+        gcloud run deploy orchestrator \
+          --image gcr.io/$PROJECT_ID/orchestrator \
+          --region ${_REGION} \
+          --project $PROJECT_ID \
+          --no-allow-unauthenticated \
+          --set-env-vars RESEARCHER_AGENT_CARD_URL=$$RESEARCHER_URL/a2a/agent/.well-known/agent-card.json \
+          --set-env-vars JUDGE_AGENT_CARD_URL=$$JUDGE_URL/a2a/agent/.well-known/agent-card.json \
+          --set-env-vars CONTENT_BUILDER_AGENT_CARD_URL=$$CONTENT_BUILDER_URL/a2a/agent/.well-known/agent-card.json \
+          --set-env-vars GOOGLE_CLOUD_PROJECT=$PROJECT_ID \
+          --set-env-vars GOOGLE_GENAI_USE_VERTEXAI="true"
+
+  # 5. Deploy App (needs Orchestrator URL)
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        ORCHESTRATOR_URL=$(gcloud run services describe orchestrator --region ${_REGION} --project $PROJECT_ID --format='value(status.url)')
+        
+        gcloud run deploy course-creator \
+          --image gcr.io/$PROJECT_ID/course-creator \
+          --region ${_REGION} \
+          --project $PROJECT_ID \
+          --allow-unauthenticated \
+          --set-env-vars AGENT_SERVER_URL=$$ORCHESTRATOR_URL \
+          --set-env-vars GOOGLE_CLOUD_PROJECT=$PROJECT_ID
+
+substitutions:
+  _REGION: us-central1
