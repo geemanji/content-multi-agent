@@ -74,7 +74,7 @@ createForm.addEventListener('submit', async (e) => {
                     } else if (data.type === 'result') {
                         // Save result and redirect
                         localStorage.setItem('currentCourse', data.text);
-                        window.location.href = '/course.html';
+                        globalThis.location.href = '/course.html';
                         return;
                     }
                 } catch (e) {
