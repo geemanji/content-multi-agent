@@ -33,6 +33,29 @@ fi
 echo "Using project ${GOOGLE_CLOUD_PROJECT}."
 echo "Using compute region ${REGION}."
 
+# Resolve symlinks by copying shared files
+echo "Copying shared files to service directories..."
+
+rm agents/researcher/adk_app.py agents/researcher/a2a_utils.py 2>/dev/null || true
+cp shared/adk_app.py agents/researcher/
+cp shared/a2a_utils.py agents/researcher/
+
+rm agents/judge/adk_app.py agents/judge/a2a_utils.py 2>/dev/null || true
+cp shared/adk_app.py agents/judge/
+cp shared/a2a_utils.py agents/judge/
+
+rm agents/content_builder/adk_app.py agents/content_builder/a2a_utils.py 2>/dev/null || true
+cp shared/adk_app.py agents/content_builder/
+cp shared/a2a_utils.py agents/content_builder/
+
+rm agents/orchestrator/adk_app.py agents/orchestrator/a2a_utils.py agents/orchestrator/authenticated_httpx.py 2>/dev/null || true
+cp shared/adk_app.py agents/orchestrator/
+cp shared/a2a_utils.py agents/orchestrator/
+cp shared/authenticated_httpx.py agents/orchestrator/
+
+rm app/authenticated_httpx.py 2>/dev/null || true
+cp shared/authenticated_httpx.py app/
+
 gcloud run deploy researcher \
   --source agents/researcher \
   --project $GOOGLE_CLOUD_PROJECT \
