@@ -46,7 +46,9 @@ def create_save_output_callback(key: str):
 
 # Connect to the Researcher (Localhost port 8001)
 researcher_url = os.environ.get(
-    "RESEARCHER_AGENT_CARD_URL", "http://localhost:8001/.well-known/agent.json")
+    "RESEARCHER_AGENT_CARD_URL",
+    "http://localhost:8001/a2a/agent/.well-known/agent.json",
+)
 researcher = RemoteA2aAgent(
     name="researcher",
     agent_card=researcher_url,
@@ -58,8 +60,10 @@ researcher = RemoteA2aAgent(
 )
 
 # Connect to the Judge (Localhost port 8002)
-judge_url = os.environ.get("JUDGE_AGENT_CARD_URL",
-                           "http://localhost:8002/.well-known/agent.json")
+judge_url = os.environ.get(
+    "JUDGE_AGENT_CARD_URL",
+    "http://localhost:8002/a2a/agent/.well-known/agent.json",
+)
 judge = RemoteA2aAgent(
     name="judge",
     agent_card=judge_url,
@@ -70,7 +74,9 @@ judge = RemoteA2aAgent(
 
 # Content Builder (Localhost port 8003)
 content_builder_url = os.environ.get(
-    "CONTENT_BUILDER_AGENT_CARD_URL", "http://localhost:8003/.well-known/agent.json")
+    "CONTENT_BUILDER_AGENT_CARD_URL",
+    "http://localhost:8003/a2a/agent/.well-known/agent.json",
+)
 content_builder = RemoteA2aAgent(
     name="content_builder",
     agent_card=content_builder_url,

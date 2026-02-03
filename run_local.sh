@@ -28,9 +28,9 @@ uv run adk_app.py --host 0.0.0.0 --port 8003 --a2a . &
 CONTENT_BUILDER_PID=$!
 popd
 
-export RESEARCHER_AGENT_CARD_URL=http://localhost:8001/a2a/agent/.well-known/agent-card.json
-export JUDGE_AGENT_CARD_URL=http://localhost:8002/a2a/agent/.well-known/agent-card.json
-export CONTENT_BUILDER_AGENT_CARD_URL=http://localhost:8003/a2a/agent/.well-known/agent-card.json
+export RESEARCHER_AGENT_CARD_URL=http://localhost:8001/a2a/agent/.well-known/agent.json
+export JUDGE_AGENT_CARD_URL=http://localhost:8002/a2a/agent/.well-known/agent.json
+export CONTENT_BUILDER_AGENT_CARD_URL=http://localhost:8003/a2a/agent/.well-known/agent.json
 
 echo "Starting Orchestrator Agent on port 8004..."
 pushd agents/orchestrator

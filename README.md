@@ -82,7 +82,7 @@ To deploy to Google Cloud Run, you need to deploy each service individually and 
     * `RESEARCHER_AGENT_CARD_URL`: `https://<researcher-url>/a2a/agent/.well-known/agent.json`
     * `JUDGE_AGENT_CARD_URL`: `https://<judge-url>/a2a/agent/.well-known/agent.json`
     * `CONTENT_BUILDER_AGENT_CARD_URL`: `https://<content-builder-url>/a2a/agent/.well-known/agent.json`
-    * `AGENT_URL`: `https://<orchestrator-url>`
+    * `AGENT_SERVER_URL`: `https://<orchestrator-url>`
 
 3. **Access:**
     Open the App's URL in your browser.

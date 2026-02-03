@@ -75,11 +75,29 @@ steps:
           --region ${_REGION} \
           --project $PROJECT_ID \
           --no-allow-unauthenticated \
-          --set-env-vars RESEARCHER_AGENT_CARD_URL=$$RESEARCHER_URL/a2a/agent/.well-known/agent-card.json \
-          --set-env-vars JUDGE_AGENT_CARD_URL=$$JUDGE_URL/a2a/agent/.well-known/agent-card.json \
-          --set-env-vars CONTENT_BUILDER_AGENT_CARD_URL=$$CONTENT_BUILDER_URL/a2a/agent/.well-known/agent-card.json \
+          --set-env-vars RESEARCHER_AGENT_CARD_URL=$$RESEARCHER_URL/a2a/agent/.well-known/agent.json \
+          --set-env-vars JUDGE_AGENT_CARD_URL=$$JUDGE_URL/a2a/agent/.well-known/agent.json \
+          --set-env-vars CONTENT_BUILDER_AGENT_CARD_URL=$$CONTENT_BUILDER_URL/a2a/agent/.well-known/agent.json \
           --set-env-vars GOOGLE_CLOUD_PROJECT=$PROJECT_ID \
           --set-env-vars GOOGLE_GENAI_USE_VERTEXAI="true"
+
+  # 4b. Smoke-check agent card endpoints (authenticated)
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        set -euo pipefail
+
+        RESEARCHER_URL=$(gcloud run services describe researcher --region ${_REGION} --project $PROJECT_ID --format='value(status.url)')
+        CONTENT_BUILDER_URL=$(gcloud run services describe content-builder --region ${_REGION} --project $PROJECT_ID --format='value(status.url)')
+        JUDGE_URL=$(gcloud run services describe judge --region ${_REGION} --project $PROJECT_ID --format='value(status.url)')
+        ORCHESTRATOR_URL=$(gcloud run services describe orchestrator --region ${_REGION} --project $PROJECT_ID --format='value(status.url)')
+
+        bash scripts/smoke_check_agent_card.sh researcher "${RESEARCHER_URL}"
+        bash scripts/smoke_check_agent_card.sh content-builder "${CONTENT_BUILDER_URL}"
+        bash scripts/smoke_check_agent_card.sh judge "${JUDGE_URL}"
+        bash scripts/smoke_check_agent_card.sh orchestrator "${ORCHESTRATOR_URL}"
 
   # 5. Deploy App (needs Orchestrator URL)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'

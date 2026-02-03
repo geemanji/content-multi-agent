@@ -88,9 +88,9 @@ gcloud run deploy orchestrator \
   --project $GOOGLE_CLOUD_PROJECT \
   --region $REGION \
   --no-allow-unauthenticated \
-  --set-env-vars RESEARCHER_AGENT_CARD_URL=$RESEARCHER_URL/a2a/agent/.well-known/agent-card.json \
-  --set-env-vars JUDGE_AGENT_CARD_URL=$JUDGE_URL/a2a/agent/.well-known/agent-card.json \
-  --set-env-vars CONTENT_BUILDER_AGENT_CARD_URL=$CONTENT_BUILDER_URL/a2a/agent/.well-known/agent-card.json \
+  --set-env-vars RESEARCHER_AGENT_CARD_URL=$RESEARCHER_URL/a2a/agent/.well-known/agent.json \
+  --set-env-vars JUDGE_AGENT_CARD_URL=$JUDGE_URL/a2a/agent/.well-known/agent.json \
+  --set-env-vars CONTENT_BUILDER_AGENT_CARD_URL=$CONTENT_BUILDER_URL/a2a/agent/.well-known/agent.json \
   --set-env-vars GOOGLE_CLOUD_PROJECT="${GOOGLE_CLOUD_PROJECT}" \
   --set-env-vars GOOGLE_GENAI_USE_VERTEXAI="true"
 ORCHESTRATOR_URL=$(gcloud run services describe orchestrator --region $REGION --project $GOOGLE_CLOUD_PROJECT --format='value(status.url)')
