@@ -1,4 +1,26 @@
 steps:
+  # 0. Prepare shared files
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "Copying shared files to service directories..."
+        cp shared/adk_app.py agents/researcher/
+        cp shared/a2a_utils.py agents/researcher/
+        
+        cp shared/adk_app.py agents/judge/
+        cp shared/a2a_utils.py agents/judge/
+        
+        cp shared/adk_app.py agents/content_builder/
+        cp shared/a2a_utils.py agents/content_builder/
+        
+        cp shared/adk_app.py agents/orchestrator/
+        cp shared/a2a_utils.py agents/orchestrator/
+        cp shared/authenticated_httpx.py agents/orchestrator/
+        
+        cp shared/authenticated_httpx.py app/
+
   # 1. Build all images
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', 'gcr.io/$PROJECT_ID/researcher', 'agents/researcher']
